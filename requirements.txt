@@ -1,0 +1,9 @@
+torch
+transformers
+sentencepiece
+datasets
+pandas
+numpy
+tqdm
+sqlparse
+tabulate
