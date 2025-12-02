@@ -1,0 +1,32 @@
+# --- Python bytecode / cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- OS / editor files ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Large / external datasets and models (not tracked here) ---
+database/
+spider/
+test-suite-sql-eval/
+data_spider_t5/
+t5_small_spider_baseline/
+checkpoint*/
+*.db
+*.sqlite
+*.pkl
+*.bin
+*.safetensors
