@@ -1,51 +1,57 @@
-LLM-Based Text-to-SQL on the Spider Dataset
+**LLM-Based Text-to-SQL on the Spider Dataset**
 
-COSC 4600 – Fundamentals of AI
-Group 6
+### *Final Project — COSC 4600: Fundamentals of AI*
 
-1. Overview
+**Group 2: Christian Blair, Ihonesty Serrano, Kane Undag, Tim Gnorski, Krishay Toomu, Aydan Smith-Tetrev**
 
-This project implements an end-to-end Text-to-SQL system using a fine-tuned T5-small language model.
-The system takes a natural-language question and generates an SQL query that can be executed on the target database.
+---
 
-Our pipeline includes:
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10-blue?style=flat-square">
+  <img src="https://img.shields.io/badge/Model-T5--Small-green?style=flat-square">
+  <img src="https://img.shields.io/badge/Dataset-Spider-orange?style=flat-square">
+</p>
 
-Data preprocessing
+---
 
-Schema serialization
+#  **1. Project Overview**
 
-Fine-tuning T5-small
+This repository contains our implementation of an **LLM-based Text-to-SQL system**, designed to translate **natural-language questions** into **SQL queries** using the **T5-small** transformer model.
 
-SQL generation using beam search
+The project includes:
 
-Evaluation of accuracy and SQL validity
+* Dataset preprocessing
+* Schema serialization
+* Fine-tuning T5-small on Spider
+* SQL generation (beam search decoding)
+* Evaluation (exact match, execution accuracy, validity)
+* Error and ablation analysis
 
-Error analysis
+The code is fully runnable following the instructions below.
 
-This README includes all instructions required to run our code.
+---
 
-2. Directory Structure
+#  **2. Repository Structure**
 
-Your project folder should look like this:
-
+```
 llm-text-to-sql/
 │
-├── README.md
-├── requirements.txt
+├── README.md                      # This file
+├── requirements.txt               # Python dependencies
 │
-├── data/
+├── data/                          # Preprocessed Spider data (included)
 │     ├── train.json
 │     ├── dev.json
 │     └── tables.json
 │
-├── model/
+├── model/                         # Model tokenizer & configuration
 │     ├── config.json
 │     ├── tokenizer.json
 │     ├── tokenizer_config.json
 │     ├── special_tokens_map.json
 │     └── spiece.model
 │
-├── src/
+├── src/                           # All source code
 │     ├── train_t5_spider.py
 │     ├── predict_baseline.py
 │     ├── prep_spider.py
@@ -53,160 +59,175 @@ llm-text-to-sql/
 │     ├── make_dev_gold_pairs.py
 │     └── make_dev_gold_sql.py
 │
-└── results/
+└── results/                       # Prediction files for evaluation
       ├── pred_dev_baseline.jsonl
       ├── pred_dev_baseline.sql
       └── dev_gold_pairs.txt
+```
 
+All code in `src/` runs directly using the folder layout above.
 
-All scripts run from this structure.
+---
 
-3. Installation
-Step 1 — Create a virtual environment
+#  **3. Installation**
 
-Windows:
+### **Create a virtual environment**
 
+**Windows**
+
+```bash
 python -m venv venv
 venv\Scripts\activate
+```
 
+**macOS / Linux**
 
-macOS/Linux:
-
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
 
-Step 2 — Install dependencies
+### **Install dependencies**
+
+```bash
 pip install -r requirements.txt
+```
 
+Dependencies include:
 
-Required packages include:
+* `torch`
+* `transformers`
+* `sentencepiece`
+* `pandas`, `numpy`
+* `sqlparse`
+* `datasets`
+* `tqdm`
 
-torch
+---
 
-transformers
+#  **4. Data Setup**
 
-sentencepiece
+We provide preprocessed Spider dataset files inside the `data/` folder:
 
-pandas
+* `train.json`
+* `dev.json`
+* `tables.json`
 
-numpy
+###  If you want to access the full Spider dataset:
 
-tqdm
+Download it from the official site:
 
-sqlparse
+**[https://yale-lily.github.io/spider](https://yale-lily.github.io/spider)**
 
-datasets
+Place it in this directory:
 
-4. Data Setup
-
-We include the preprocessed Spider data inside the data/ directory:
-
-train.json
-
-dev.json
-
-tables.json
-
-These files are small and allow the code to run without needing to download the full Spider dataset.
-
-If you want to regenerate the processed data
-
-Download Spider from the official source:
-
-🔗 https://yale-lily.github.io/spider
-
-Place the raw dataset here:
-
+```
 llm-text-to-sql/spider/
-
+```
 
 Then run:
 
+```bash
 python -m src.prep_spider
+```
 
+This will regenerate `train.json` and `dev.json`.
 
-This will produce new train/dev sets in data/.
+---
 
-5. Running the Code
-5.1. Train the model
+#  **5. Running the Code**
 
-This fine-tunes T5-small using the training split:
+## **5.1. Train the T5-small model**
 
+```bash
 python -m src.train_t5_spider \
     --train_file data/train.json \
     --dev_file data/dev.json \
     --output_dir model
+```
 
+This script fine-tunes T5-small and saves updated configuration files.
 
-Training outputs:
+---
 
-Updated tokenizer configs
+## **5.2. Generate SQL predictions**
 
-Model configuration
-
-Saved checkpoints (if enabled)
-
-5.2. Generate SQL predictions on the dev set
+```bash
 python -m src.predict_baseline \
     --model_dir model \
     --dev_file data/dev.json \
     --output_file results/pred_dev_baseline.jsonl
+```
 
+This produces a JSONL file of predictions.
 
-This produces predictions in JSONL format.
+---
 
-5.3. Convert predictions to SQL-only format
+## **5.3. Convert predictions to SQL-only format**
+
+```bash
 python -m src.to_eval_format \
     --pred_file results/pred_dev_baseline.jsonl \
     --output_file results/pred_dev_baseline.sql
+```
 
-5.4. Generate gold SQL files (for evaluation)
+---
 
-These help compare predictions to the correct SQL:
+## **5.4. Generate gold SQL files for evaluation**
 
+```bash
 python -m src.make_dev_gold_pairs \
     --dev_file data/dev.json \
     --output_file results/dev_gold_pairs.txt
+```
 
+```bash
 python -m src.make_dev_gold_sql \
     --dev_file data/dev.json \
     --output_file results/dev_gold.sql
+```
 
-6. Notes on Large Data Files
+---
 
-The full Spider dataset is too large to include in the submission zip file.
-This README provides:
+#  **6. Notes on Large Files**
 
-A download link
+The **full Spider dataset** and **model weight files** are intentionally **NOT** included because they exceed file size limits.
 
-Instructions for placement
+Instead, we provide:
 
-Steps to preprocess the data
+* Preprocessed small JSON files required to run all scripts
+* Instructions for downloading & placing the raw Spider data
+---
 
-This satisfies the assignment requirement:
+#  **7. Quick Start Summary**
 
-“If data files are very large… include the data link in the readme… add proper instructions where to put the downloaded data.”
-(✔ done)
+To reproduce our full pipeline:
 
-7. How to Run Everything (Quick Summary)
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-Install Python requirements
+# Train model
+python -m src.train_t5_spider --train_file data/train.json --dev_file data/dev.json --output_dir model
 
-Make sure data/ and model/ folders are present
+# Generate predictions
+python -m src.predict_baseline --model_dir model --dev_file data/dev.json --output_file results/pred_dev_baseline.jsonl
 
-Run:
+# Convert to SQL
+python -m src.to_eval_format --pred_file results/pred_dev_baseline.jsonl --output_file results/pred_dev_baseline.sql
 
-train_t5_spider.py to train
+# Extract gold SQL
+python -m src.make_dev_gold_success --dev_file data/dev.json --output_file results/dev_gold_pairs.txt
+```
 
-predict_baseline.py to generate SQL
+Everything is runnable from the root folder.
 
-to_eval_format.py to clean predictions
+---
 
-make_dev_gold_pairs.py to extract gold labels
+#  **8. Contact**
 
-Compare predicted SQL vs gold SQL in results/
-
-8. Contact
-
-Group 6 — COSC 4600 (Fall 2025)
+Group 2 — COSC 4600
 Marquette University
+Fall 2025
+
+---
