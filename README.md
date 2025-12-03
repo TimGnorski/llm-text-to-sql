@@ -1,7 +1,7 @@
 
 # LLM-based Text-to-SQL on Spider
 
-This repository contains my final project for the **Fundamentals of AI** course.  
+This repository contains Group 2's final project for the **Fundamentals of AI** course.  
 The goal is to train and evaluate a **T5-based Text-to-SQL model** on the **Spider** dataset, mapping natural language questions to SQL queries over relational databases.
 
 ---
